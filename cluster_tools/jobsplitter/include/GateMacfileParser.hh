@@ -18,7 +18,7 @@ See GATE/LICENSE.txt for further details
 
 /*use this class to generate fully resolved macfiles and a splitfile*/
 
-enum {ROOT=0,ASCII=1,ARF=2,PROJ=3,ECAT=4,SINO=5,ACCEL=6,LMF=7,CT=8, GPUSPECT=9, DAQ=10,MDB=11,SIZE=12};
+enum {ROOT=0,ASCII=1,ARF=2,PROJ=3,ECAT=4,SINO=5,ACCEL=6,LMF=7,CT=8, GPUSPECT=9, BINARY=10, DAQ=11,MDB=12,SIZE=13};
 
 class GateMacfileParser
 {
@@ -67,6 +67,7 @@ public:
   G4String originalCTFileName;
 	G4String originalSPECTGPUFileName;
   G4String originalARFFileName;
+  G4String originalBinaryFileName;
   // Conerning actor
   std::vector<G4String> listOfActorType;
   std::vector<G4String> listOfActorName;

@@ -678,8 +678,8 @@ void GateMacfileParser::ExtractLocalDirectory(G4String macfileName)
 /*just note if there is an enable command*/
 void GateMacfileParser::LookForEnableOutput()
 {
-	// {ROOT=0,ASCII=1,ARF=2,PROJ=3,ECAT=4,SINO=5,ACCEL=6,LMF=7,CT=8,DAQ=9,MDB=10,SIZE=11,
-	//GPUSPECT=12}
+	// {ROOT=0,ASCII=1,ARF=2,PROJ=3,ECAT=4,SINO=5,ACCEL=6,LMF=7,CT=8,GPUSPECT=9,BINARY=10, DAQ=11,
+	//MDB=12,SIZE=13}
 	if      (G4StrUtil::contains(macline, "/gate/output/root/disable"))            {enable[ROOT]=0;macline="";}
 	else if (G4StrUtil::contains(macline, "/gate/output/root/enable"))             {enable[ROOT]=1;macline="";}
 	else if (G4StrUtil::contains(macline, "/gate/output/ascii/disable"))           {enable[ASCII]=0;macline="";}
@@ -700,6 +700,8 @@ void GateMacfileParser::LookForEnableOutput()
 	else if (G4StrUtil::contains(macline, "/gate/output/imageCT/enable"))          {enable[CT]=1;macline="";}
 	else if (G4StrUtil::contains(macline, "/gate/output/spectGPU/disable"))         {enable[GPUSPECT]=0;macline="";}
 	else if (G4StrUtil::contains(macline, "/gate/output/spectGPU/enable"))          {enable[GPUSPECT]=1;macline="";}
+	else if (G4StrUtil::contains(macline, "/gate/output/binary/disable"))         {enable[BINARY]=0;macline="";}
+	else if (G4StrUtil::contains(macline, "/gate/output/binary/enable"))          {enable[BINARY]=1;macline="";}
 }
 
 void GateMacfileParser::CheckOutputPrint()
@@ -707,8 +709,8 @@ void GateMacfileParser::CheckOutputPrint()
 	// ===========================================================================================
 	// Concerning output modules
 	// ===========================================================================================
-	// {ROOT=0,ASCII=1,ARF=2,PROJ=3,ECAT=4,SINO=5,ACCEL=6,LMF=7,CT=8,DAQ=9,MDB=10,SIZE=11,
-	//GPUSPECT=12}
+	// {ROOT=0,ASCII=1,ARF=2,PROJ=3,ECAT=4,SINO=5,ACCEL=6,LMF=7,CT=8,GPUSPECT=9,BINARY=10, DAQ=11,
+	//MDB=12,SIZE=13}
 	//cases are:
 	//1) output disabled and not filename is given -> ok 
 	//2) output disabled but a filename is given -> output is let disabled
@@ -785,6 +787,13 @@ void GateMacfileParser::CheckOutputPrint()
         }
         else if (filenames[GPUSPECT]==1) cout << "  GPUSPECT   output is disabled but a filename is given (let it disable)" << endl;
         else cout << "  GPUSPECT   output is disabled" << endl;
+				if (enable[BINARY]==1) // the enable command was found
+        {
+                if (filenames[BINARY]==1) cout << "  BINARY     output is enabled" << endl; // a filaname was given, it's good
+                else cout << "  BINARY     output is enabled but no filename is given (disable it by default)" << endl; // no filename given
+        }
+        else if (filenames[BINARY]==1) cout << "  BINARY     output is disabled but a filename is given (let it disable)" << endl;
+        else cout << "  BINARY     output is disabled" << endl;
 	// ===========================================================================================
 	// Concerning actors
 	// ===========================================================================================
@@ -808,6 +817,7 @@ void GateMacfileParser::CheckOutput(ofstream& output,ofstream& /*splitfile*/,G4i
 	if(enable[LMF]==1 && filenames[LMF]==1)     output << "/gate/output/lmf/enable" << endl;
 	if(enable[CT]==1 && filenames[CT]==1)       output << "/gate/output/imageCT/enable" << endl;
 	if(enable[GPUSPECT]==1 && filenames[GPUSPECT]==1)       output << "/gate/output/spectGPU/enable" << endl;
+	if(enable[BINARY]==1 && filenames[BINARY]==1)       output << "/gate/output/binary/enable" << endl;
 }
 
 //CHANGED$
@@ -826,8 +836,8 @@ void GateMacfileParser::AddPWD(G4String key)
 /*assumes that aliasing has been completed beforehand*/
 void GateMacfileParser::InsertOutputFileNames(G4int splitNumber,ofstream& splitfile)
 {
-	// {ROOT=0,ASCII=1,ARF=2,PROJ=3,ECAT=4,SINO=5,ACCEL=6,LMF=7,CT=8,DAQ=9,MDB=10,SIZE=11,
-	// GPUSPECT=12}
+	// {ROOT=0,ASCII=1,ARF=2,PROJ=3,ECAT=4,SINO=5,ACCEL=6,LMF=7,CT=8,GPUSPECT=9,BINARY=10, DAQ=11,
+	//MDB=12,SIZE=13}
 	char SplitNumberAsString[10];
 	sprintf(SplitNumberAsString,"%i",splitNumber);
 
@@ -881,6 +891,11 @@ void GateMacfileParser::InsertOutputFileNames(G4int splitNumber,ofstream& splitf
         {
                 AddPWD("/gate/output/spectGPU/setFileName");
                 filenames[GPUSPECT]=1;
+        }
+	else if( TreatOutputStream("/gate/output/binary/setFileName", "binaryfile", originalBinaryFileName, SplitNumberAsString) )
+        {
+                AddPWD("/gate/output/binary/setFileName");
+                filenames[BINARY]=1;
         }
 	else if( G4StrUtil::contains(macline, "/gate/geometry/setMaterialDatabase") )
 	{
